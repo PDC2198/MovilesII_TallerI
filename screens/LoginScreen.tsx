@@ -7,35 +7,41 @@ import {
     StyleSheet,
     KeyboardAvoidingView,
     Platform,
-    ImageBackground
+    ImageBackground,
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export default function LoginScreen({ navigation }) {
-    const [username, setUsername] = useState('');
+import { Ionicons } from '@expo/vector-icons';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../firebaseConfig';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../navigation/types';
+
+type LoginScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Login'>;
+
+export default function LoginScreen() {
+    const navigation = useNavigation<LoginScreenNavigationProp>();
+
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
 
     const handleLogin = async () => {
+        if (!email.trim() || !password.trim()) {
+            alert('⚠️ Por favor ingresa email y contraseña');
+            return;
+        }
         try {
-            const userData = await AsyncStorage.getItem('user');
-            if (userData) {
-                const { username: storedUser, password: storedPass } = JSON.parse(userData);
-                if (username === storedUser && password === storedPass) {
-                    navigation.replace('Home');
-                } else {
-                    alert('Usuario o contraseña incorrectos');
-                }
-            } else {
-                alert('No hay ningún usuario registrado');
-            }
-        } catch (error) {
-            alert('Error al iniciar sesión');
+            await signInWithEmailAndPassword(auth, email, password);
+            navigation.replace('Home');
+        } catch (error: any) {
+            alert(`❌ Error al iniciar sesión: ${error.message}`);
         }
     };
 
     return (
         <ImageBackground
-            source={require('../assets//fondo.jpeg')} 
+            source={require('../assets/fondo.jpeg')}
             style={styles.background}
             resizeMode="cover"
         >
@@ -43,31 +49,49 @@ export default function LoginScreen({ navigation }) {
                 style={styles.container}
                 behavior={Platform.OS === 'ios' ? 'padding' : undefined}
             >
-                <Text style={styles.title}>Iniciar Sesión</Text>
+                <Text style={styles.title}>🔐 Iniciar Sesión</Text>
 
-                <TextInput
-                    placeholder="Nombre de usuario"
-                    placeholderTextColor="#999"
-                    style={styles.input}
-                    value={username}
-                    onChangeText={setUsername}
-                />
-
-                <TextInput
-                    placeholder="Contraseña"
-                    placeholderTextColor="#999"
-                    style={styles.input}
-                    secureTextEntry
-                    value={password}
-                    onChangeText={setPassword}
-                />
+                <View style={styles.inputWrapper}>
+                    <Ionicons name="mail-outline" size={22} color="#1abc9c" style={styles.iconLeft} />
+                    <TextInput
+                        placeholder="Correo electrónico"
+                        placeholderTextColor="#999"
+                        style={styles.inputWithIcon}
+                        value={email}
+                        onChangeText={setEmail}
+                        keyboardType="email-address"
+                        autoCapitalize="none"
+                    />
+                </View>
+                <View style={styles.inputWrapper}>
+                    <Ionicons name="lock-closed-outline" size={22} color="#1abc9c" style={styles.iconLeft} />
+                    <TextInput
+                        placeholder="Contraseña"
+                        placeholderTextColor="#999"
+                        style={[styles.inputWithIcon, { paddingRight: 45 }]}
+                        secureTextEntry={!showPassword}
+                        value={password}
+                        onChangeText={setPassword}
+                    />
+                    <TouchableOpacity
+                        onPress={() => setShowPassword(!showPassword)}
+                        style={styles.eyeButton}
+                        activeOpacity={0.7}
+                    >
+                        <Ionicons
+                            name={showPassword ? 'eye' : 'eye-off'}
+                            size={26}
+                            color="#1abc9c"
+                        />
+                    </TouchableOpacity>
+                </View>
 
                 <TouchableOpacity style={styles.button} onPress={handleLogin}>
-                    <Text style={styles.buttonText}>Entrar</Text>
+                    <Text style={styles.buttonText}>🚀 Entrar</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-                    <Text style={styles.link}>¿No tienes cuenta? Regístrate</Text>
+                    <Text style={styles.link}>📝 ¿No tienes cuenta? Regístrate</Text>
                 </TouchableOpacity>
             </KeyboardAvoidingView>
         </ImageBackground>
@@ -84,7 +108,7 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         paddingHorizontal: 25,
-        backgroundColor: 'rgba(0, 0, 0, 0.6)', // Opcional: para oscurecer el fondo
+        backgroundColor: 'rgba(0, 0, 0, 0.6)',
     },
     title: {
         fontSize: 32,
@@ -93,14 +117,30 @@ const styles = StyleSheet.create({
         marginBottom: 30,
         textAlign: 'center',
     },
-    input: {
+    inputWrapper: {
+        position: 'relative',
+        marginBottom: 20,
+        justifyContent: 'center',
+    },
+    iconLeft: {
+        position: 'absolute',
+        left: 15,
+        zIndex: 10,
+    },
+    inputWithIcon: {
         backgroundColor: '#222',
         color: '#fff',
         borderRadius: 8,
-        paddingHorizontal: 15,
+        paddingHorizontal: 45, 
         paddingVertical: 12,
         fontSize: 16,
-        marginBottom: 20,
+    },
+    eyeButton: {
+        position: 'absolute',
+        right: 15,
+        top: '50%',
+        transform: [{ translateY: -13 }],
+        zIndex: 10,
     },
     button: {
         backgroundColor: '#1abc9c',

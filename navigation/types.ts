@@ -2,7 +2,7 @@ export type RootStackParamList = {
     Welcome: undefined;
     Home: undefined;
     Login: undefined;
-    Registrer: undefined;
+    Register: undefined;
     Puntaje: {
         nombre: string;
         puntaje: number;
