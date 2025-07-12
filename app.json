@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "app-tallerI",
-    "slug": "app-tallerI",
+    "name": "Caza Zombies",
+    "slug": "appjuego",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -20,10 +20,17 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.pabloadc.appjuego"
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "446d39c6-5fca-49f1-929a-777aadfb3f4e"
+      }
+    },
+    "owner": "pabloadc"
   }
 }
